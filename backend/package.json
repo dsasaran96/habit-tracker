@@ -9,7 +9,9 @@
   "author": "Dragos Sasaran",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.2"
+    "bcrypt": "^5.0.1",
+    "express": "^4.17.2",
+    "express-validator": "^6.14.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.7",
