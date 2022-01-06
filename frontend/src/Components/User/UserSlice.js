@@ -1,9 +1,17 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const userInfoString = localStorage.getItem("user_info")
+const currentUserInfo = userInfoString ? JSON.parse(userInfoString) : null
+
 const initUserState = {
-    loggedInUser: null,
+    loggedInUser: currentUserInfo,
     registerState: {
+        loading: "idle",
+        error: null,
+        currentRequestID: undefined
+    },
+    signinState: {
         loading: "idle",
         error: null,
         currentRequestID: undefined
@@ -20,6 +28,25 @@ export const registerUser = createAsyncThunk("user/register", async (userInfo, t
     try{
         //make API call
         const response = await axios.post('user/register', userInfo)
+        localStorage.setItem("user_info", JSON.stringify(response.data))
+        return response.data
+    } catch (error) {
+        const {rejectWithValue} = thunkAPI
+        return rejectWithValue(error.response.data)
+    }
+})
+
+export const signinUser = createAsyncThunk("user/signin", async (userInfo, thunkAPI) => {
+    //error handling   
+    const {loading, currentRequestID} = thunkAPI.getState().user.signinState
+    if(loading !== 'pending' || thunkAPI.requestId !== currentRequestID) {
+        return
+    }
+
+    try{
+        //make API call
+        const response = await axios.post('user/signin', userInfo)
+        localStorage.setItem("user_info", JSON.stringify(response.data))
         return response.data
     } catch (error) {
         const {rejectWithValue} = thunkAPI
@@ -53,6 +80,30 @@ const userSlice = createSlice({
                 registerState.loading = "idle"
                 registerState.currentRequestID = undefined
                 registerState.error = null
+                state.loggedInUser = action.payload
+            }
+        },
+        [signinUser.pending]: (state, action) => {
+            const {signinState} = state
+            if(signinState.loading === "idle") {
+                signinState.loading = "pending"
+                signinState.currentRequestID = action.meta.requestId
+            }
+        },
+        [signinUser.rejected]: (state, action) => {
+            const {signinState} = state
+            if(signinState.loading === "pending") {
+                signinState.loading = "idle"
+                signinState.currentRequestID = undefined
+                signinState.error = action.payload
+            }
+        },
+        [signinUser.fulfilled]: (state, action) => {
+            const {signinState} = state
+            if(signinState.loading === "pending") {
+                signinState.loading = "idle"
+                signinState.currentRequestID = undefined
+                signinState.error = null
                 state.loggedInUser = action.payload
             }
         },
