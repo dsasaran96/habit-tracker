@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator'
 import bcrypt from 'bcrypt'
 
 import { pool } from '../db/dbConnect'
+import { getToken } from '../util'
 
 const router = express.Router()
 
@@ -86,7 +87,7 @@ router.post('/register', userInfoValidation("register"), async (req, res) => {
 
     const newUser = queryRes.rows[0]
 
-    res.send(newUser)
+    res.send({...newUser, token: getToken(newUser)})
 })
 
 router.post("/signin", userInfoValidation ("signin"), async (req, res) => {
@@ -113,7 +114,7 @@ router.post("/signin", userInfoValidation ("signin"), async (req, res) => {
         return res.status(401).send([{param: "userNotFound", msg: "Incorrect Email or Password"}])
     }
     const {passwordhash, ...userWithoutPw} = possibleUser
-    res.send(userWithoutPw)
+    res.send({...userWithoutPw, token: getToken(userWithoutPw)})
 })
 
 export default router

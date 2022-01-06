@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { registerUser } from 'Components/User/UserSlice'
+import { registerUser, resetRegisterState } from 'Components/User/UserSlice'
 import { useDispatch, useSelector } from 'react-redux'
 
 const PageContainer = styled.div`
@@ -117,6 +117,10 @@ const Register = () => {
         return errorObj ? errorObj.msg : null
     }
 
+    const handleResetState = () => {
+        dispatch(resetRegisterState())
+    }
+
     return (
         <PageContainer>
             <PageTitle>hab.it</PageTitle>
@@ -155,7 +159,7 @@ const Register = () => {
                         </SubmitButton>
                     </ButtonContainer>
                 </FormContainer>
-                <div>Already have an account? <StyledLink to="/signin">Login Here</StyledLink></div>
+                <div>Already have an account? <StyledLink to="/signin" onClick={handleResetState}>Login Here</StyledLink></div>
             </RegisterContainer>
         </PageContainer>
     )
