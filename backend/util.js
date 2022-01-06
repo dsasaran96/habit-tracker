@@ -18,6 +18,6 @@ export const getAuthUser = (req, res, next) => {
             return
         })
     } else {
-        return res.status(401).send({param: "authError", msg: "Token not found"})
+        return res.status(401).send([{param: "authError", msg: "Token not found"}])
     }
 }

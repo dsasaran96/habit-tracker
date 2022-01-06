@@ -2,6 +2,8 @@ import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { getGoals } from './GoalsSlice'
+import { logoutUser } from 'Components/User/UserSlice';
+import AddGoalButton from 'Components/Goals/AddGoalButton'
 
 const GoalsContainer = styled.div`
     display: flex;
@@ -19,16 +21,6 @@ const TitleSection = styled.div`
     text-transform: uppercase;
     letter-spacing: 8px;
     font-size: 30px;
-`;
-
-const AddGoalButton = styled.div`
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    img {
-        max-width: 16px;
-        margin-right: 8px;
-    }
 `;
 
 const GoalRow = styled.div`
@@ -58,6 +50,9 @@ const Action = styled.div`
     }
 `
 
+const ErrorSection = styled.div`
+    color: red;
+`
 
 const Goals = () => {
     const dispatch = useDispatch()
@@ -65,21 +60,30 @@ const Goals = () => {
     const goalState = useSelector(state => state.goals)
     const { goalsList, loading, error } = goalState
 
+    const userState = useSelector(state => state.user)
+    const { loggedInUser } = userState
+
     useEffect(() => {
-        dispatch(getGoals())
-    }, [dispatch])
+        if(loggedInUser) {
+            const userInfo = {token: loggedInUser.token}
+            dispatch(getGoals(userInfo))
+        }
+        if(error && error[0].param === "auth error") {
+            dispatch(logoutUser())
+        }
+    }, [dispatch, loggedInUser, error])
 
     return (
         <GoalsContainer>
-            {error && <div>Error fetching goals</div>}
+            {error && <ErrorSection>{error[0].msg}</ErrorSection>}
             {loading === 'pending' ? (<div>Loading..</div>) : (
                 <>
                     <GoalsHeader>
                         <TitleSection>Goals</TitleSection>
-                        <AddGoalButton><img src="images/add.png" alt="add-goal-button" />add goal</AddGoalButton>
+                        <AddGoalButton />
                     </GoalsHeader>
-                    {goalsList && goalsList.map((goal, index) => (
-                        <GoalRow key={`goal-number-` + index}>
+                    {goalsList && goalsList.map((goal) => (
+                        <GoalRow key={`goal-number-` + goal.id}>
                             <Name>{goal.name}</Name>
                             <Action><img src="images/edit.png" alt="edit-goal-button"/> <img src="images/delete.png" alt="delete-goal-button" /></Action>
                         </GoalRow>

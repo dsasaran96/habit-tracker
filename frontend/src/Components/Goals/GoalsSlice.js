@@ -1,10 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-export const getGoals = createAsyncThunk("goals/get", async (thunkAPI) => {
+export const getGoals = createAsyncThunk("goals/get", async (userInfo, thunkAPI) => {
     //call api for get /goals
     try {
-        const response = await axios.get('/goals')
+        const {token} = userInfo
+        const response = await axios.get('/goals', {
+            headers: {Authorization: "Bearer " + token}
+        })
         return response.data
     } catch (error) {
         const { rejectWithValue } = thunkAPI
