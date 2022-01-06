@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 import Goals from 'Components/Goals'
+import { logoutUser } from 'Components/User/UserSlice'
+import { useDispatch, useSelector } from 'react-redux'
 
 const GridContainer = styled.div`
     display: grid;
@@ -43,8 +45,26 @@ const HeaderItem = styled.div`
     };
     font-size: 22px;
 `
+const SignOutButton = styled.button`
+    background-color: #9da631;
+    border: none;
+    border-radius: 2px;
+    padding: 10px 12px 10px 12px;
+    color: white;
+    :hover {
+        cursor: pointer;
+    }
+`
 
 const MyHabitsDesktop = () => {
+    const userState = useSelector(state => state.user)
+    const { loggedInUser } = userState
+    
+    const dispatch = useDispatch()
+    const handleLogout = () => {
+        dispatch(logoutUser())
+    }
+
     return (
         <GridContainer>
             <NavContainer>
@@ -55,7 +75,14 @@ const MyHabitsDesktop = () => {
                 <HeaderContainer>
                     <HeaderItem>My Habits</HeaderItem>
                     <HeaderItem>History</HeaderItem>
-                    <HeaderItem>Hi Dragos!</HeaderItem>
+                    <HeaderItem>Hi, {loggedInUser && loggedInUser.firstname}!</HeaderItem>
+                    <HeaderItem>
+                        {loggedInUser && (
+                        <SignOutButton onClick={() => handleLogout()}>
+                            Sign out
+                        </SignOutButton>
+                        )}
+                    </HeaderItem>
                 </HeaderContainer>
             </MainContainer>
         </GridContainer>
